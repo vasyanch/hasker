@@ -60,12 +60,9 @@ def profile(request, id_user):
     error = ''
     user = request.user
     trending = Question.objects.popular()
-    ref_to_avatar = user.userprofile.avatar.url.split('/')
-    ref_to_avatar = '/'.join(ref_to_avatar[2:])
     if request.user.id != id_user:
         error = 'Sorry!\nYou can watch only your profile page'
     return render(request, 'users/profile.html',{
-        'ref_to_avatar': ref_to_avatar,
         'user': user,
         'trending': trending,
         'error': error,

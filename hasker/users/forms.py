@@ -21,9 +21,9 @@ class UserProfileSignupForm(forms.ModelForm):
 
     def clean_avatar(self):
         avatar = self.cleaned_data.get('avatar')
-        if avatar is None:
-            raise forms.ValidationError('Add picture')
-        if 'image' not in avatar.content_type:
+        #if avatar is None:
+        #    raise forms.ValidationError('Add picture,')
+        if avatar is not None and'image' not in avatar.content_type:
             raise forms.ValidationError('Wrong format of picture')
         return avatar
 

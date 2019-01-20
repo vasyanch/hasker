@@ -9,4 +9,4 @@ def user_directory_path(instance, filename):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
-    avatar = models.ImageField(upload_to=user_directory_path)
+    avatar = models.ImageField(upload_to=user_directory_path, blank=True, null=True)
