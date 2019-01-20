@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>{{question.title}}</h2>
+  <div>{{question.text}}</div>
+  <dl class="row">
+    <dd class="col-sm-9 html">
+      {% for tag in question.tags.all %}
+      <span class="badge badge-success">{{ tag.text }}</span>
+      {% endfor %}
+    </dd>
+    <dd class="col-sm-3 html">
+      <a href="{% url 'users:profile' question.author.id %}">{{ question.author.username }}</a>
+    </dd>
+  </dl>
+
+  <hr>
+  <h3>Answers</h3>
+  {% for ans in question.answer_set.all %}
+    <dl class="row">
+      <dd class="col-sm-9 html">{{ans.text}}</dd>
+      <dd class="col-sm-3 html">
+        <a href="{% url 'users:profile' ans.author.id %}">{{ ans.author.username }}</a>
+      </dd>
+    </dl>
+    <hr>
+  {% endfor %}
+
+  {% if user.is_authenticated %}
+    <h4>Replay</h4>
+    {% for e in form.non_field_errors %}
+      <div class="alert alert-danger">{{ e }}</div>
+    {% endfor %}
+    <form class="form-horizontal" method="POST" action="{% url 'qa:question' question.id %}">
+      {% csrf_token %}
+      <div class="control-group{% if field.errors %}has-error{% endif %}">
+
+        <div class="controls">{{ form.text }}</div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  {% endif %}
+{% endblock %}

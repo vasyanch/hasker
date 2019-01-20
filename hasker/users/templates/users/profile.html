@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if error %}
+  <h2>{{ error }}</h2>
+{% else %}
+  <h2>Settings</h2>
+    <dl class="row">
+      <dt class="col-sm-3 html">Login</dt>
+      <dd class="col-sm-9 html">{{ user.username }}</dd>
+
+      <dt class="col-sm-3 html">Email</dt>
+      <dd class="col-sm-9 html">{{ user.email }}</dd>
+
+      <dt class="col-sm-3 html">Avatar</dt>
+      <dd class="col-sm-9 html">
+        <img src="{{ user.userprofile.avatar.url }}" height = "200" alt="No avatar">
+      </dd>
+    </dl>
+{% endif %}
+{% endblock %}
