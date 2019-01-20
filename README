@@ -1,3 +1,5 @@
 СУБД
 
 В данном проекте используется СУБД MySQL.
+
+python manage.py runserver --settings hasker.settings.base

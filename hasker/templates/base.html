@@ -34,7 +34,7 @@
                     Ask Question!
                 </a>
                 <div class="item">
-                    {% if user.profile.avatar %}
+                    {% if user.userprofile.avatar %}
                       <img class="ui mini image" style="margin-right: 10px;" src="{{ user.userprofile.avatar.url }}">
                     {% endif %}
                     <a href="{% url 'users:profile' user.id %}">{{ user.username }}</a>
