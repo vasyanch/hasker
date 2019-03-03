@@ -1,8 +1,6 @@
-from django.db import models
-
 from django.contrib.auth.models import User
-from django.http import Http404
-from django.core.paginator import Paginator, EmptyPage
+from django.db import models
+from django.urls import reverse
 
 
 class Tag(models.Model):
@@ -14,27 +12,28 @@ class Tag(models.Model):
 
 class QuestionManager(models.Manager):
     def new(self):
-        return self.order_by('-added_at')
+        return self.order_by('-added_at', '-rating')
 
     def popular(self):
         return self.order_by('-rating', '-added_at')
 
 
 class Question(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(verbose_name='title', max_length=255)
     text = models.TextField()
     author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     added_at = models.DateTimeField(blank=True, auto_now_add=True)
-    tags = models.ManyToManyField(Tag, related_name='questions')
     rating = models.IntegerField(default=0)
-    #likes = models.ManyToManyField(User, related_name='Users')
+    tags = models.ManyToManyField(Tag, related_name='questions')
+    correct_answer = models.OneToOneField('Answer', on_delete=models.SET_NULL, blank=True, null=True,
+                                          related_name='correct_answer')
     objects = QuestionManager()
 
     def __str__(self):
         return self.text
 
     def get_url(self):
-        return '/qa/question/{0}/'.format(str(self.id))
+        return reverse('qa:question', args=[self.id])
 
     def save(self, tags_str=[], *args, **kwargs):
         super(Question, self).save(*args, **kwargs)
@@ -44,32 +43,19 @@ class Question(models.Model):
             tags.append(tag)
         self.tags.add(*tags)
 
+    def get_tags(self):
+        return self.tags.all()
+
+    def get_answers(self):
+        return self.answer_set.all()
+
 
 class Answer(models.Model):
     text = models.TextField()
-    author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     added_at = models.DateTimeField(blank=True, auto_now_add=True)
-    right_answer = models.BooleanField(default=False)
-    question = models.ForeignKey(Question, null=False, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    question = models.ForeignKey(Question, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.text
 
-
-def paginate(request, qs):
-    try:
-        limit = int(request.GET.get('limit', 20))
-    except ValueError:
-        limit = 20
-    if limit > 100:
-        limit = 20
-    try:
-        page = int(request.GET.get('page', 1))
-    except ValueError:
-        raise Http404
-    paginator = Paginator(qs, limit)
-    try:
-        page = paginator.page(page)
-    except EmptyPage:
-        page = paginator.page(paginator.num_pages)
-    return paginator, page

@@ -4,7 +4,7 @@
   <h1>
     <dl class="row">
       <dd class="col-sm-6 html"><a href="/">New questions</a></dd>
-      <dd class="col-sm-6 html"><a href="{% url 'qa:index_pop' 'pop' %}" class="text-muted">Hot questions</a></dd>
+      <dd class="col-sm-6 html"><a href="{% url 'qa:index_pop' %}" class="text-muted">Hot questions</a></dd>
     </dl>
   </h1>
   <hr>
@@ -14,7 +14,7 @@
       <dd class="col-sm-2 html">{{ q.answer_set.count }}<div>answers</div></dd>
       <dt class="col-sm-6 html">
         <a href="{% url 'qa:question' q.id %}"><h3>{{ q.title }}</h3></a>
-        {% for tag in q.tags.all %}
+        {% for tag in q.get_tags %}
           <span class="badge badge-success">{{ tag.text }}</span>
         {% endfor %}
       </dt>
@@ -24,22 +24,23 @@
     </dl>
     <hr>
   {% endfor %}
-  {% if user.is_authenticated %}
-    <h2>{{user.username}}</h2>
-  {% else %}
-    <h3>Anon</h3>
-  {% endif %}
 
 
-  <nav><ul class="pagination">
-    {% for p in paginator.page_range %}
-      {% if p == page.number %}
-        <li class="active">
-      {% else %}
-        <li>
-      {% endif %}
-      <a href="{{ paginator.baseurl }}{{ p }}">{{ p }}</a>
-      </li>
-    {% endfor %}
-  </ul></nav>
+  <div class="pagination">
+    <span class="step-links">
+        {% if objects_list.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ objects_list.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ objects_list.number }} of {{objects_list.paginator.num_pages }}.
+        </span>
+
+        {% if objects_list.has_next %}
+            <a href="?page={{ objects_list.next_page_number }}">next</a>
+            <a href="?page={{ objects_list.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
 {% endblock %}

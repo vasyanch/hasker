@@ -1,5 +1,17 @@
-СУБД
+Веб-проект Hasker
 
-В данном проекте используется СУБД MySQL.
+  Сайт на которым Вы можете задать вопрос и получить на него ответ, аналог Stackoverflow. Для того чтобы иметь возможность
+  задать вопрос или дать ответ необходимо зарегистрироваться, для просмотра вопросов и ответов других пользователей
+  регистрация не обязательна.
 
-python manage.py runserver --settings hasker.settings.base
+Используемые технологии
+
+  python 3.6
+  django 2.1.
+  модуль python pillow
+  MySQL
+  bootstrap
+
+Развертывание проекта
+
+  python manage.py runserver --settings hasker.settings.base

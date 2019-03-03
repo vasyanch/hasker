@@ -2,6 +2,7 @@ from django import forms
 
 from .models import Tag, Question, Answer
 
+
 class AskForm(forms.Form):
     title = forms.CharField(max_length=100)
     text = forms.CharField(widget=forms.Textarea)
@@ -17,9 +18,6 @@ class AskForm(forms.Form):
             return []
         tags = tags.split(',')[:3]
         return [str(t) for t in tags]
-
-    def clean(self):
-        return self.cleaned_data
 
     def save(self):
         self.cleaned_data['author'] = self._user
@@ -40,17 +38,9 @@ class AnswerForm(forms.Form):
 
     def clean_question(self):
         q_id = self.cleaned_data['question']
-        try:
-            question = Question.objects.get(id=q_id)
-        except Question.DoesNotExist:
-            question = None
-        return question
-
-    def clean(self):
-        return self.cleaned_data
+        return Question.objects.get(id=q_id)
 
     def save(self):
         self.cleaned_data['author'] = self._user
         answer = Answer(**self.cleaned_data)
-        answer.save()
-        return answer
+        return answer.save()

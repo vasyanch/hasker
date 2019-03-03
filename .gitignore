@@ -9,4 +9,6 @@ mysql
 venv
 __pycache__
 ava_user_**
-
+hasker/hasker/settings/secret.py
+answer
+todo

@@ -5,7 +5,7 @@
   <div>{{question.text}}</div>
   <dl class="row">
     <dd class="col-sm-9 html">
-      {% for tag in question.tags.all %}
+      {% for tag in question.get_tags %}
       <span class="badge badge-success">{{ tag.text }}</span>
       {% endfor %}
     </dd>
@@ -16,7 +16,7 @@
 
   <hr>
   <h3>Answers</h3>
-  {% for ans in question.answer_set.all %}
+  {% for ans in question.get_answers %}
     <dl class="row">
       <dd class="col-sm-9 html">{{ans.text}}</dd>
       <dd class="col-sm-3 html">
@@ -33,9 +33,11 @@
     {% endfor %}
     <form class="form-horizontal" method="POST" action="{% url 'qa:question' question.id %}">
       {% csrf_token %}
-      <div class="control-group{% if field.errors %}has-error{% endif %}">
-
-        <div class="controls">{{ form.text }}</div>
+      <div class="control-group{% if form.text.errors %}has-error{% endif %}">
+        <div>{{ form.text }}</div>
+      </div>
+      <div class="control-group{% if form.question.errors %}has-error{% endif %}">
+        <div >{{ form.question }}</div>
       </div>
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Submit</button>

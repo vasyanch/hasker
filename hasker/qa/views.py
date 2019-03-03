@@ -1,68 +1,95 @@
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.models import AnonymousUser
 from django.http import HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
+from django.views import View, generic
 
-from .models import Tag, Question, Answer, paginate
 from .forms import AskForm, AnswerForm
+from .models import Tag, Question, Answer
 
 
-def index(request, flag='new'):
-    if flag == 'new':
-        set_questions = Question.objects.new()
-    elif flag == 'pop':
-        set_questions = Question.objects.popular()
-    else:
+class IndexView(generic.ListView):
+    template_name = 'qa/index.html'
+    context_object_name = 'list_questions'
+    paginate_by = 10
+    flag = 'new'
+
+    def get_queryset(self):
         set_questions = None
-    trending = Question.objects.popular()
-    paginator, page = paginate(request, set_questions)
-    paginator.baseurl = '/?page='
-    user = request.user
-    return render(request, 'qa/index.html', {
-        'list_questions': page.object_list,
-        'paginator': paginator,
-        'page': page,
-        'user': user,
-        'trending': trending,
-    })
+        if self.flag == 'new':
+            set_questions = Question.objects.new()
+        if self.flag == 'pop':
+            set_questions = Question.objects.popular()
+        return set_questions
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['trending'] = Question.objects.popular()
+        context['user'] = self.request.user
+        page = self.request.GET.get('page')
+        context['page_obj'] = page
+        context['objects_list'] = context['paginator'].get_page(page)
+        return context
 
 
-def question_add(request):
-    if request.method == 'POST':
-        form = AskForm(request.user, request.POST)
+class QuestionAddView(View):
+    form_class = AskForm
+    context = {'trending': Question.objects.popular()}
+    template_name = 'qa/question_add.html'
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class(request.user)
+        self.context['form'] = form
+        return render(request, self.template_name, self.context)
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.user, request.POST)
         if form.is_valid():
             question = form.save()
             url = question.get_url()
             return HttpResponseRedirect(url)
-    else:
-        form = AskForm(request.user)
-    trending = Question.objects.popular()
-    return render(request, 'qa/question_add.html', {
-        'form': form,
-        'trending': trending,
-    })
+        self.context['form'] = form
+        return render(request, self.template_name, self.context)
 
 
-def question_details(request, id_):
-    question = get_object_or_404(Question, id=id_)
-    user = request.user
-    trending = Question.objects.popular()
-    if request.method == 'POST':
-        form = AnswerForm(request.user, request.POST)
+class QuestionDetailsView(View):
+    form_class = AnswerForm
+    context = {'trending': Question.objects.popular()}
+    template_name = 'qa/question_details.html'
+
+    def get(self, request, *args, **kwargs):
+        self.context['question'] = get_object_or_404(Question, id=self.kwargs['id'])
+        form = self.form_class(request, initial={'question': self.context['question'].id})
+        self.context['user'] = request.user
+        self.context['form'] = form
+        return render(request, self.template_name, self.context)
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.user, request.POST)
+        self.context['question'] = get_object_or_404(Question, id=self.kwargs['id'])
         if form.is_valid():
             form.save()
-            url = question.get_url()
-            print(url)
+            url = self.context['question'].get_url()
             return HttpResponseRedirect(url)
-    else:
-        form = AnswerForm(request.user, initial={'question': question.id})
-    return render(request, 'qa/question_details.html', {
-        'question': question,
-        'form': form,
-        'trending': trending,
-        'user': user,
-    })
+        self.context['user'] = request.user
+        self.context['form'] = form
+        return render(request, self.template_name, self.context)
+
+
+def not_found(request, exception, template_name='404.html'):
+    context = {
+        'trending': Question.objects.popular(),
+        'request_path': request.path,
+        'exception': exception,
+    }
+    return render(request, template_name, context, status=404)
+
+
+def server_error(request, template_name='500.html'):
+    context = {
+        'trending': Question.objects.popular(),
+        'request_path': request.path,
+    }
+    return render(request, template_name, context, status=500)
 
 
 def search(request):
     pass
-

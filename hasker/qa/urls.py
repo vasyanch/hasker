@@ -4,10 +4,9 @@ from . import views
 
 app_name = 'qa'
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('index/<flag>/', views.index, name='index_pop'),
-    path('ask/', views.question_add, name='ask'),
-    path('question/<int:id_>/', views.question_details, name='question'),
+    path('pop/', views.IndexView.as_view(flag='pop'), name='index_pop'),
+    path('ask/', views.QuestionAddView.as_view(), name='ask'),
+    path('question/<int:id>/', views.QuestionDetailsView.as_view(), name='question'),
     path('search/', views.search, name='search'),
 
 ]

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Http code: 404</h1>
+  <h1>Sorry... this page not found</h1>
+  <h2>Url: {{ request_path }}</h2>
+  <h4>{{ exception }}</h4>
+
+{% endblock %}
