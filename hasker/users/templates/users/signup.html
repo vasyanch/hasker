@@ -9,12 +9,12 @@
   <form class="form" method="POST" action="{% url 'users:signup' %}" enctype="multipart/form-data">
     {% 	csrf_token %}
       {% for field in form %}
-        <div class="control-group{% if field.errors %}has-error{% endif %}">
+        <div class="control-group {% if field.errors %} has-error {% endif %}">
           <label class="control-label">{{ field.label }}</label>
           <div class="controls">{{ field }}</div>
         </div>
       {% endfor %}
-      <div class="control-group{% if profile_form.avatar.errors %}has-error{% endif %}">
+      <div class="control-group {% if profile_form.avatar.errors %} has-error {% endif %}">
         <label class="control-label">{{ profile_form.avatar.label }}</label>
         <div><input type="file" name="avatar">{% if profile_form.avatar.errors %}{{ profile_form.avatar.errors }}{% endif %}</div>
       </div>

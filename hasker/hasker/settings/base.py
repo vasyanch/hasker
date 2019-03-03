@@ -1,8 +1,8 @@
 import os
 
-from .secret import SECRET_KEY
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+SECRET_KEY = os.getenv('HASKER_SECRET')
 
 DEBUG = True
 

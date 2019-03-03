@@ -1,7 +1,9 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views import View
+
 
 from .forms import SignupForm, UserProfileSignupForm
 from qa.models import Question
@@ -40,7 +42,7 @@ class SignUpView(View):
 
 
 class LogInView(View):
-    form = SignupForm
+    form = AuthenticationForm
     context = {
         'trending': Question.objects.popular(),
         'error': ''
@@ -54,7 +56,7 @@ class LogInView(View):
 
     def post(self, request, *args, **kwargs):
         username = request.POST.get('username')
-        password = request.POST.get('password1')
+        password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)

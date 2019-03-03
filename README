@@ -14,4 +14,5 @@
 
 Развертывание проекта
 
+  Для развертывания проекта необходимо передать SECRET_KEY через переменную окружения HASKER_SECRET
   python manage.py runserver --settings hasker.settings.base
