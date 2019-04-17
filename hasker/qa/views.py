@@ -1,3 +1,4 @@
+from django.core.mail import send_mail
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.views import View, generic
@@ -6,22 +7,39 @@ from .forms import AskForm, AnswerForm
 from .models import Tag, Question, Answer
 
 
+class VoteView(View):
+    # 'SORRY! You can vote only for one question and one answer'
+    def post(self, request, *args, **kwargs):
+        models = request.POST.get('models')
+        url = request.POST.get('url')
+        object_id = request.POST.get('object_id')
+        if models == 'question' and request.user.userprofile.id_voted_question is None:
+            models = get_object_or_404(Question, id=object_id)
+        elif models == 'answer' and request.user.userprofile.id_voted_answer is None:
+            models = get_object_or_404(Answer, id=object_id)
+        else:
+            return HttpResponseRedirect(url)
+        rating = int(request.POST.get('rating'))
+        models.vote(rating, request.user, object_id)
+        return HttpResponseRedirect(url)
+
+
 class IndexView(generic.ListView):
+    model = Question
     template_name = 'qa/index.html'
     context_object_name = 'list_questions'
-    paginate_by = 10
+    paginate_by = 20
     flag = 'new'
 
     def get_queryset(self):
-        set_questions = None
         if self.flag == 'new':
-            set_questions = Question.objects.new()
+            return Question.objects.new()
         if self.flag == 'pop':
-            set_questions = Question.objects.popular()
-        return set_questions
+            return Question.objects.popular()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['flag'] = self.flag
         context['trending'] = Question.objects.popular()
         context['user'] = self.request.user
         page = self.request.GET.get('page')
@@ -57,39 +75,87 @@ class QuestionDetailsView(View):
 
     def get(self, request, *args, **kwargs):
         self.context['question'] = get_object_or_404(Question, id=self.kwargs['id'])
-        form = self.form_class(request, initial={'question': self.context['question'].id})
+        form = self.form_class(request.user)
         self.context['user'] = request.user
         self.context['form'] = form
         return render(request, self.template_name, self.context)
 
     def post(self, request, *args, **kwargs):
+        question = get_object_or_404(Question, id=self.kwargs['id'])
+        self.context['question'] = question
+        self.context['user'] = request.user
+        try:
+            correct_answer = get_object_or_404(Answer, id=request.POST['correct_answer'])
+        except KeyError:
+            pass
+        else:
+            question.correct_answer = correct_answer
+            question.save()
         form = self.form_class(request.user, request.POST)
-        self.context['question'] = get_object_or_404(Question, id=self.kwargs['id'])
         if form.is_valid():
             form.save()
-            url = self.context['question'].get_url()
+            url = question.get_url()
+            send_mail(
+                'New answer!',
+                """A new answer for your question!\nFollow this link to see it: {}""".format(url),
+                'vasyanch@yandex.ru',
+                [question.author.email],
+                fail_silently=False
+            )
             return HttpResponseRedirect(url)
-        self.context['user'] = request.user
         self.context['form'] = form
         return render(request, self.template_name, self.context)
 
 
-def not_found(request, exception, template_name='404.html'):
+class NotFoundView(View):
+    template_name = '404.html'
     context = {
         'trending': Question.objects.popular(),
-        'request_path': request.path,
-        'exception': exception,
+        'exception': '',
     }
-    return render(request, template_name, context, status=404)
+
+    def get(self, request, *args, **kwargs):
+        self.context['exception'] = self.kwargs['exception']
+        self.context['request_path'] = request.path
+        return render(request, self.template_name, self.context)
 
 
-def server_error(request, template_name='500.html'):
-    context = {
-        'trending': Question.objects.popular(),
-        'request_path': request.path,
-    }
-    return render(request, template_name, context, status=500)
+class ServerError(View):
+    template_name = '500.html'
+    context = {'trending': Question.objects.popular()}
+
+    def get(self, request, *args, **kwargs):
+        self.context['request_path'] = request.path
+        return render(request, self.template_name, self.context)
 
 
-def search(request):
-    pass
+class SearchView(IndexView):
+    template_name = 'qa/search_result.html'
+
+    def get_queryset(self):
+        query = self.request.GET.get('query')
+        if not query:
+            return Question.objects.none()
+        if query.startswith('tag'):
+            self.template_name = 'qa/tag_search_result.html'
+            tag_text = query.split(':')[1]
+            try:
+                tag_object = Tag.objects.get(text=tag_text.strip())
+                ans = tag_object.questions.all()
+            except Tag.DoesNotExist:
+                return Question.objects.none()
+        else:
+            title_list = Question.objects.filter(title__icontains=query)
+            text_list = Question.objects.filter(text__icontains=query)
+            ans = title_list | text_list
+        return ans.order_by('-rating', '-added_at')
+
+
+class SearchTagView(IndexView):
+    template_name = 'qa/tag_search_result.html'
+
+    def get_queryset(self):
+        tag_text = self.kwargs['tag']
+        tag_object = Tag.objects.get(text=tag_text.strip())
+        ans = tag_object.questions.all()
+        return ans.order_by('-rating', '-added_at')

@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Log In</h2>
-  <div>{{error}}</div>
-  {% for e in form.non_field_errors %}
-    <div class="alert alert-danger">{{ e }}</div>
-  {% endfor %}
-  <form class="form-horizontal" method="POST" action="{% url 'users:login' %}">
-    {% 	csrf_token %}
-    {{ form }}
-    <input class="btn btn-primary" type="submit" value="Log in">
-  </form>
+    <h2>Log In</h2>
+    <div>{{error}}</div>
+    {% for e in form.non_field_errors %}
+        <div class="alert alert-danger">{{ e }}</div>
+    {% endfor %}
+    <form class="form-horizontal" method="POST" action="{% url 'users:login' %}">
+        {% 	csrf_token %}
+        {{ form }}
+        <input class="btn btn-primary" type="submit" value="Log in">
+    </form>
 {% endblock %}

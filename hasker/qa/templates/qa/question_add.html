@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Ask a question</h2>
-  {% for e in form.non_field_errors %}
-    <div class="alert alert-danger">{{ e }}</div>
-  {% endfor %}
-  <form method="POST" action="{% url 'qa:ask' %}">
-    {% 	csrf_token %}
-    {% for field in form %}
-    <div class="control-group {% if field.errors %} has-error {% endif %}">
-      <label>{{ field.label }}</label>
-      <div>{{ field }}</div>
-    </div>
+    <h2>Ask a question</h2>
+    {% for e in form.non_field_errors %}
+        <div class="alert alert-danger">{{ e }}</div>
     {% endfor %}
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary">Ask</button>
-    </div>
-  </form>
+    <form method="POST" action="{% url 'qa:ask' %}">
+        {% 	csrf_token %}
+        {% for field in form %}
+            <div class="control-group {% if field.errors %} has-error {% endif %}">
+                <label>{{ field.label }}</label>
+                <div>{{ field }}</div>
+            </div>
+        {% endfor %}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Ask</button>
+        </div>
+    </form>
 {% endblock %}

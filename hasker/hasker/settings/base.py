@@ -1,8 +1,10 @@
 import os
+from .secret import SECRET_KEY
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-SECRET_KEY = os.getenv('HASKER_SECRET')
+# SECRET_KEY = os.getenv('HASKER_SECRET')
 
 DEBUG = True
 
@@ -95,3 +97,7 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static/')]
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+EMAIL_HOST = 'localhost'
+
+EMAIL_PORT = 1025

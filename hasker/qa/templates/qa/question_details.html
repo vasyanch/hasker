@@ -1,47 +1,92 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h2>{{question.title}}</h2>
-  <div>{{question.text}}</div>
-  <dl class="row">
-    <dd class="col-sm-9 html">
-      {% for tag in question.get_tags %}
-      <span class="badge badge-success">{{ tag.text }}</span>
-      {% endfor %}
-    </dd>
-    <dd class="col-sm-3 html">
-      <a href="{% url 'users:profile' question.author.id %}">{{ question.author.username }}</a>
-    </dd>
-  </dl>
-
-  <hr>
-  <h3>Answers</h3>
-  {% for ans in question.get_answers %}
+    <h2>{{question.title}}</h2>
     <dl class="row">
-      <dd class="col-sm-9 html">{{ans.text}}</dd>
-      <dd class="col-sm-3 html">
-        <a href="{% url 'users:profile' ans.author.id %}">{{ ans.author.username }}</a>
-      </dd>
+        <dd class="col-sm-2 html">
+            {% if user.is_authenticated %}
+                <form action="{% url 'qa:vote' %}" method="post">
+                    {% csrf_token %}
+                    <input class="small" type="submit" name="rating" value="+1">
+                    {{ question.rating }}
+                    <input class="small" type="submit" name="rating" value="-1">
+                    <input type="hidden" name="object_id" value="{{question.id}}">
+                    <input type="hidden" name="models" value="question">
+                    <input type="hidden" name="url" value="{% url 'qa:question' question.id %}">
+                </form>
+            {% else %}
+                {{ question.rating }}
+            {% endif %}
+        </dd>
+        <dd class="col-sm-7 html"><div>{{ question.text }}</div></dd>
+        <dd class="col-sm-3 html"><div>{{ question.get_date }}</div></dd>
     </dl>
-    <hr>
-  {% endfor %}
+    <dl class="row">
+        <dd class="col-sm-9 html">
+            {% for tag in question.get_tags %}
+                <a href="{% url 'qa:search_tag' tag.text %}">
+                    <span class="badge badge-success">{{ tag.text }}</span>
+                </a>
+            {% endfor %}
+        </dd>
+        <dd class="col-sm-3 html">
+            <a href="{% url 'users:profile' question.author_id %}">{{ question.author.username }}</a>
+        </dd>
+    </dl>
 
-  {% if user.is_authenticated %}
-    <h4>Replay</h4>
-    {% for e in form.non_field_errors %}
-      <div class="alert alert-danger">{{ e }}</div>
+    <hr>
+    <h3>Answers</h3>
+    {% for ans in question.get_answers %}
+        <dl class="row">
+            <dd class="col-sm-2 html">
+                {% if ans.is_correct %}
+                    <div class="badge badge-success">correct</div>
+                {% endif %}
+                {% if user.is_authenticated %}
+                    <form action="{% url 'qa:vote' %}" method="post">
+                        {% csrf_token %}
+                        <input class="small" type="submit" name="rating" value="+1">
+                        {{ ans.rating }}
+                        <input class="small" type="submit" name="rating" value="-1">
+                        <input type="hidden" name="object_id" value="{{ans.id}}">
+                        <input type="hidden" name="models" value="answer">
+                        <input type="hidden" name="url" value="{% url  'qa:question' question.id %}">
+                    </form>
+                {% else %}
+                    {{ ans.rating }}
+                {% endif %}
+            </dd>
+            <dd class="col-sm-7 html">{{ ans.text }}</dd>
+            <dd class="col-sm-3 html">
+                <div>{{ ans.get_date }}</div>
+                <a href="{% url 'users:profile' ans.author_id %}">{{ ans.author.username }}</a>
+            </dd>
+        </dl>
+        {% if user.id == question.author_id and not ans.is_correct%}
+            <form action="{% url 'qa:question' question.id %}" method="post">
+                {% csrf_token %}
+                <small>This is the correct answer?</small>
+                <input type="radio" name="correct_answer" value="{{ans.id}}">
+                <input type="submit" value="submit">
+            </form>
+        {% endif %}
+        <hr>
     {% endfor %}
-    <form class="form-horizontal" method="POST" action="{% url 'qa:question' question.id %}">
-      {% csrf_token %}
-      <div class="control-group{% if form.text.errors %}has-error{% endif %}">
-        <div>{{ form.text }}</div>
-      </div>
-      <div class="control-group{% if form.question.errors %}has-error{% endif %}">
-        <div >{{ form.question }}</div>
-      </div>
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </div>
-    </form>
-  {% endif %}
+
+    {% if user.is_authenticated %}
+        <h4>Replay</h4>
+        {% for e in form.non_field_errors %}
+            <div class="alert alert-danger">{{ e }}</div>
+        {% endfor %}
+        <form class="form-horizontal" method="POST" action="{% url 'qa:question' question.id %}">
+            {% csrf_token %}
+            <div class="control-group{% if form.text.errors %}has-error{% endif %}">
+                <div>{{ form.text }}</div>
+            </div>
+            <input type="hidden" name="question" value="{{question.id}}">
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+    {% endif %}
 {% endblock %}

@@ -1,12 +1,12 @@
 from django import forms
 
-from .models import Tag, Question, Answer
+from .models import Question, Answer
 
 
 class AskForm(forms.Form):
     title = forms.CharField(max_length=100)
     text = forms.CharField(widget=forms.Textarea)
-    tags = forms.CharField()
+    tags = forms.CharField(required=False)
 
     def __init__(self, user, *args, **kwargs):
         self._user = user
@@ -17,7 +17,7 @@ class AskForm(forms.Form):
         if not tags:
             return []
         tags = tags.split(',')[:3]
-        return [str(t) for t in tags]
+        return [t.strip() for t in tags]
 
     def save(self):
         self.cleaned_data['author'] = self._user
@@ -30,7 +30,7 @@ class AskForm(forms.Form):
 
 class AnswerForm(forms.Form):
     text = forms.CharField(widget=forms.Textarea)
-    question = forms.IntegerField(widget=forms.HiddenInput)
+    question = forms.IntegerField()
 
     def __init__(self, user, *args, **kwargs):
         self._user = user

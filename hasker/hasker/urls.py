@@ -13,5 +13,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-handler404 = 'qa.views.not_found'
-handler500 = 'qa.views.server_error'
+handler404 = qa_views.NotFoundView.as_view()
+handler500 = qa_views.ServerError.as_view()

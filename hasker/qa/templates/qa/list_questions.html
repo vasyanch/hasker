@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <div class="row">{% block title_list %}{% endblock %}</div>
+
+    <hr>
+    {% for q in list_questions %}
+        <dl class="row">
+            <dd class="col-sm-1 html">{{ q.rating }}<div>rating</div></dd>
+            <dd class="col-sm-1 html">{{ q.answer_set.count }}<div>answers</div></dd>
+            <dt class="col-sm-8 html">
+                <a href="{% url 'qa:question' q.id %}"><h3>{{ q.title }}</h3></a>
+                {% for tag in q.get_tags %}
+                    <a href="{% url 'qa:search_tag' tag.text %}">
+                        <span class="badge badge-success">{{ tag.text }}</span>
+                    </a>
+                {% endfor %}
+            </dt>
+            <dt class="col-sm-2 html">
+                <div>{{ q.get_date }}</div>
+                <a href ="{% url 'users:profile' q.author.id %}">{{q.author.username}}</a>
+            </dt>
+        </dl>
+        <hr>
+    {% endfor %}
+
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if objects_list.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ objects_list.previous_page_number }}">previous</a>
+            {% endif %}
+            <span class="current">Page {{ objects_list.number }} of {{objects_list.paginator.num_pages }}.</span>
+
+            {% if objects_list.has_next %}
+                <a href="?page={{ objects_list.next_page_number }}">next</a>
+                <a href="?page={{ objects_list.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+{% endblock %}

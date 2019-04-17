@@ -1,25 +1,26 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Sign Up</h2>
-
-  {% for e in form.non_field_errors %}
-    <div class="alert alert-danger">{{ e }}</div>
-  {% endfor %}
-  <form class="form" method="POST" action="{% url 'users:signup' %}" enctype="multipart/form-data">
-    {% 	csrf_token %}
-      {% for field in form %}
-        <div class="control-group {% if field.errors %} has-error {% endif %}">
-          <label class="control-label">{{ field.label }}</label>
-          <div class="controls">{{ field }}</div>
+    <h2>Sign Up</h2>
+    {% for e in form.non_field_errors %}
+        <div class="alert alert-danger">{{ e }}</div>
+    {% endfor %}
+    <form class="form" method="POST" action="{% url 'users:signup' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="control-group {% if field.errors %} has-error {% endif %}">
+                <label class="control-label">{{ field.label }}</label>
+                <div class="controls">{{ field }}</div>
+            </div>
+        {% endfor %}
+        <div class="control-group {% if profile_form.avatar.errors %} has-error {% endif %}">
+            <label class="control-label">{{ profile_form.avatar.label }}</label>
+            <div><input type="file" name="avatar">
+                {% if profile_form.avatar.errors %}{{ profile_form.avatar.errors }}{% endif %}
+            </div>
         </div>
-      {% endfor %}
-      <div class="control-group {% if profile_form.avatar.errors %} has-error {% endif %}">
-        <label class="control-label">{{ profile_form.avatar.label }}</label>
-        <div><input type="file" name="avatar">{% if profile_form.avatar.errors %}{{ profile_form.avatar.errors }}{% endif %}</div>
-      </div>
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary">Sign up</button>
-    </div>
-  </form>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Sign up</button>
+        </div>
+    </form>
 {% endblock %}

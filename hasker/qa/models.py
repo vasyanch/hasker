@@ -10,6 +10,13 @@ class Tag(models.Model):
         return self.text
 
 
+class Vote:
+    def vote(self, rating):
+        if rating in (-1, 1):
+            self.rating += rating
+            self.save()
+
+
 class QuestionManager(models.Manager):
     def new(self):
         return self.order_by('-added_at', '-rating')
@@ -18,7 +25,7 @@ class QuestionManager(models.Manager):
         return self.order_by('-rating', '-added_at')
 
 
-class Question(models.Model):
+class Question(Vote, models.Model):
     title = models.CharField(verbose_name='title', max_length=255)
     text = models.TextField()
     author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
@@ -47,15 +54,42 @@ class Question(models.Model):
         return self.tags.all()
 
     def get_answers(self):
-        return self.answer_set.all()
+        return self.answer_set.order_by('-rating', 'added_at')
+
+    def get_date(self):
+        return self.added_at.strftime("%d.%m.%Y")
+
+    def vote(self, rating, user, q_id):
+        super(Question, self).vote(rating)
+        user.userprofile.id_voted_question = q_id
+        user.userprofile.value_voted_question = rating
+        user.userprofile.title_voted_question = self.title
+        user.userprofile.save()
 
 
-class Answer(models.Model):
+class Answer(Vote, models.Model):
     text = models.TextField()
     added_at = models.DateTimeField(blank=True, auto_now_add=True)
+    rating = models.IntegerField(default=0)
     author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     question = models.ForeignKey(Question, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.text
+
+    def get_date(self):
+        return self.added_at.strftime("%d.%m.%Y")
+
+    def is_correct(self):
+        if self.question.correct_answer_id == self.id:
+            return True
+        return False
+
+    def vote(self, rating, user, ans_id):
+        super(Answer, self).vote(rating)
+        user.userprofile.id_voted_answer = ans_id
+        user.userprofile.value_voted_answer = rating
+        user.userprofile.title_voted_answer = self.question.title
+        user.userprofile.id_question_voted_answer = self.question.id
+        user.userprofile.save()
 

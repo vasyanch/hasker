@@ -7,12 +7,22 @@
 Используемые технологии
 
   python 3.6
-  django 2.1.
-  модуль python pillow
+  django 2.2
+  pillow 6.0
+  mysql  0.0.2
+  mysql-connector-python 8.0.15
+  mysqlclient 1.4.2.post1
+
   MySQL
   bootstrap
 
 Развертывание проекта
 
-  Для развертывания проекта необходимо передать SECRET_KEY через переменную окружения HASKER_SECRET
-  python manage.py runserver --settings hasker.settings.base
+  - Для развертывания проекта необходимо передать SECRET_KEY через переменную окружения HASKER_SECRET
+  - Для развертывания проекта в продакшен необходимо настроить параметры подключения к БД(файл prod.py в settings,
+    словарь DATABASES), пароль к БД передается через переменную окружения MYSQL_PASSWORD_FOR_HASKER
+  - Для развертывания проекта в продакшен необходимо настроить параметры отправки email автору вопроса при появлении
+    нового ответа(файл prod.py в settings, здесь задаются логин, пароль, хост для сервера отправки почты) пароль
+    к ящику передается через переменную окружения EMAIL_PASSWORD
+  - pip install mysql-connector-python
+  - python manage.py runserver --settings hasker.settings.base
