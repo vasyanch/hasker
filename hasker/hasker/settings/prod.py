@@ -1,6 +1,6 @@
 from .base import *
 
-#DEBUG = False
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -9,17 +9,17 @@ MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD_FOR_HASKER')
 DATABASES = {
     'default': {
         'NAME': 'hasker',
-        'ENGINE': 'mysql.connector.django',  # 'django.db.backends.mysql',
+        'ENGINE': 'mysql.connector.django',  # 'django.db.backends.mysql'
         'USER': 'django',
         'PASSWORD': MYSQL_PASSWORD,
         'OPTIONS': {
             'autocommit': True,
-        }
+        },
     }
 }
 
 if not DEBUG:
-    STATIC_ROOT = '/home/django/www-data/hasker.com/static/'
+    STATIC_ROOT = '/home/django/www-data/hasker/static/'
 
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465

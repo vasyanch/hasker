@@ -35,20 +35,33 @@ class UserProfile(models.Model):
     def get_url(self):
         return reverse('users:profile', args=[self.user_id])
 
+    def vote_question(self, question_id, rating, question_title):
+        self.id_voted_question = question_id
+        self.value_voted_question = rating
+        self.title_voted_question = question_title
+        self.save()
+
+    def cancel_vote_question(self):
+        question = get_object_or_404(Question, id=self.id_voted_question)
+        question.cancel_vote(rating=self.value_voted_question)
+        self.value_voted_question = self.id_voted_question = self.title_voted_question = None
+        self.save()
+
+    def vote_answer(self, answer_id, rating, question_title, question_id):
+        self.id_voted_answer = answer_id
+        self.value_voted_answer = rating
+        self.title_voted_answer = question_title
+        self.id_question_voted_answer = question_id
+        self.save()
+
+    def cancel_vote_answer(self):
+        answer = get_object_or_404(Answer, id=self.id_voted_answer)
+        answer.cancel_vote(rating=self.value_voted_answer)
+        self.value_voted_answer = self.id_voted_answer = self.title_voted_answer = self.id_question_voted_answer = None
+        self.save()
+
     def get_url_voted_answer(self):
         return reverse('qa:question', args=[self.id_question_voted_answer])
 
     def get_url_voted_question(self):
         return reverse('qa:question', args=[self.id_voted_question])
-
-    def cancel_vote_question(self):
-        question = get_object_or_404(Question, id=self.id_voted_question)
-        question.rating = question.rating - self.value_voted_question
-        question.save()
-        self.value_voted_question = self.id_voted_question = self.title_voted_question = None
-
-    def cancel_vote_answer(self):
-        answer = get_object_or_404(Answer, id=self.id_voted_answer)
-        answer.rating = answer.rating - self.value_voted_answer
-        answer.save()
-        self.value_voted_answer = self.id_voted_answer = self.title_voted_answer = self.id_question_voted_answer = None

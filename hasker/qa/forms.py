@@ -43,4 +43,5 @@ class AnswerForm(forms.Form):
     def save(self):
         self.cleaned_data['author'] = self._user
         answer = Answer(**self.cleaned_data)
-        return answer.save()
+        answer.save()
+        return answer

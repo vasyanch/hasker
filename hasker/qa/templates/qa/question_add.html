@@ -6,7 +6,7 @@
         <div class="alert alert-danger">{{ e }}</div>
     {% endfor %}
     <form method="POST" action="{% url 'qa:ask' %}">
-        {% 	csrf_token %}
+        {% csrf_token %}
         {% for field in form %}
             <div class="control-group {% if field.errors %} has-error {% endif %}">
                 <label>{{ field.label }}</label>

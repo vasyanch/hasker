@@ -15,6 +15,8 @@ class Vote:
         if rating in (-1, 1):
             self.rating += rating
             self.save()
+            return True
+        return False
 
 
 class QuestionManager(models.Manager):
@@ -28,7 +30,7 @@ class QuestionManager(models.Manager):
 class Question(Vote, models.Model):
     title = models.CharField(verbose_name='title', max_length=255)
     text = models.TextField()
-    author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    author = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
     added_at = models.DateTimeField(blank=True, auto_now_add=True)
     rating = models.IntegerField(default=0)
     tags = models.ManyToManyField(Tag, related_name='questions')
@@ -44,11 +46,11 @@ class Question(Vote, models.Model):
 
     def save(self, tags_str=[], *args, **kwargs):
         super(Question, self).save(*args, **kwargs)
-        tags = []
+        tags_list = []
         for t in tags_str:
             tag, created = Tag.objects.get_or_create(text=t)
-            tags.append(tag)
-        self.tags.add(*tags)
+            tags_list.append(tag)
+        self.tags.add(*tags_list)
 
     def get_tags(self):
         return self.tags.all()
@@ -59,20 +61,23 @@ class Question(Vote, models.Model):
     def get_date(self):
         return self.added_at.strftime("%d.%m.%Y")
 
-    def vote(self, rating, user, q_id):
-        super(Question, self).vote(rating)
-        user.userprofile.id_voted_question = q_id
-        user.userprofile.value_voted_question = rating
-        user.userprofile.title_voted_question = self.title
-        user.userprofile.save()
+    def vote(self, rating, user):
+        if super(Question, self).vote(rating):
+            user.userprofile.vote_question(question_id=self.id,
+                                           rating=rating,
+                                           question_title=self.title)
+
+    def cancel_vote(self, rating):
+        self.rating = self.rating - rating
+        self.save()
 
 
 class Answer(Vote, models.Model):
     text = models.TextField()
     added_at = models.DateTimeField(blank=True, auto_now_add=True)
     rating = models.IntegerField(default=0)
-    author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    question = models.ForeignKey(Question, null=True, on_delete=models.SET_NULL)
+    author = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, null=False, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.text
@@ -85,11 +90,14 @@ class Answer(Vote, models.Model):
             return True
         return False
 
-    def vote(self, rating, user, ans_id):
-        super(Answer, self).vote(rating)
-        user.userprofile.id_voted_answer = ans_id
-        user.userprofile.value_voted_answer = rating
-        user.userprofile.title_voted_answer = self.question.title
-        user.userprofile.id_question_voted_answer = self.question.id
-        user.userprofile.save()
+    def vote(self, rating, user):
+        if super(Answer, self).vote(rating):
+            user.userprofile.vote_answer(answer_id=self.id,
+                                         rating=rating,
+                                         question_title=self.question.title,
+                                         question_id=self.question.id)
+
+    def cancel_vote(self, rating):
+        self.rating = self.rating - rating
+        self.save()
 

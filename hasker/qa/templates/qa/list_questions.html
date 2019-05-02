@@ -19,7 +19,7 @@
             </dt>
             <dt class="col-sm-2 html">
                 <div>{{ q.get_date }}</div>
-                <a href ="{% url 'users:profile' q.author.id %}">{{q.author.username}}</a>
+                <a href ="{% url 'users:profile' q.author.id %}">{{ q.author.username }}</a>
             </dt>
         </dl>
         <hr>

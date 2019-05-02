@@ -7,23 +7,6 @@ from .forms import AskForm, AnswerForm
 from .models import Tag, Question, Answer
 
 
-class VoteView(View):
-    # 'SORRY! You can vote only for one question and one answer'
-    def post(self, request, *args, **kwargs):
-        models = request.POST.get('models')
-        url = request.POST.get('url')
-        object_id = request.POST.get('object_id')
-        if models == 'question' and request.user.userprofile.id_voted_question is None:
-            models = get_object_or_404(Question, id=object_id)
-        elif models == 'answer' and request.user.userprofile.id_voted_answer is None:
-            models = get_object_or_404(Answer, id=object_id)
-        else:
-            return HttpResponseRedirect(url)
-        rating = int(request.POST.get('rating'))
-        models.vote(rating, request.user, object_id)
-        return HttpResponseRedirect(url)
-
-
 class IndexView(generic.ListView):
     model = Question
     template_name = 'qa/index.html'
@@ -37,7 +20,7 @@ class IndexView(generic.ListView):
         if self.flag == 'pop':
             return Question.objects.popular()
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context['flag'] = self.flag
         context['trending'] = Question.objects.popular()
@@ -50,8 +33,11 @@ class IndexView(generic.ListView):
 
 class QuestionAddView(View):
     form_class = AskForm
-    context = {'trending': Question.objects.popular()}
     template_name = 'qa/question_add.html'
+
+    def __init__(self, *args, **kwargs):
+        super(QuestionAddView, self).__init__(*args, **kwargs)
+        self.context = {'trending': Question.objects.popular()}
 
     def get(self, request, *args, **kwargs):
         form = self.form_class(request.user)
@@ -70,14 +56,21 @@ class QuestionAddView(View):
 
 class QuestionDetailsView(View):
     form_class = AnswerForm
-    context = {'trending': Question.objects.popular()}
     template_name = 'qa/question_details.html'
+
+    def __init__(self, *args, **kwargs):
+        super(QuestionDetailsView, self).__init__(*args, **kwargs)
+        self.context = {
+            'trending': Question.objects.popular(),
+            'vote_error': ''
+        }
 
     def get(self, request, *args, **kwargs):
         self.context['question'] = get_object_or_404(Question, id=self.kwargs['id'])
-        form = self.form_class(request.user)
         self.context['user'] = request.user
-        self.context['form'] = form
+        if self.context['user'].is_authenticated:
+            form = self.form_class(request.user)
+            self.context['form'] = form
         return render(request, self.template_name, self.context)
 
     def post(self, request, *args, **kwargs):
@@ -85,12 +78,28 @@ class QuestionDetailsView(View):
         self.context['question'] = question
         self.context['user'] = request.user
         try:
-            correct_answer = get_object_or_404(Answer, id=request.POST['correct_answer'])
-        except KeyError:
+            rating = int(request.POST.get('rating'))
+            models = request.POST.get('models')
+            object_id = request.POST.get('object_id')
+            if models == 'question' and request.user.userprofile.id_voted_question is None:
+                models = get_object_or_404(Question, id=object_id)
+                models.vote(rating, request.user)
+            elif models == 'answer' and request.user.userprofile.id_voted_answer is None:
+                models = get_object_or_404(Answer, id=object_id)
+                models.vote(rating, request.user)
+            else:
+                self.context['vote_error'] = 'Sorry, you can vote only one question and one answer! ' \
+                                             'But you can change you choice! See you profile page.'
+            question = get_object_or_404(Question, id=self.kwargs['id'])
+            self.context['question'] = question
+        except TypeError:
             pass
-        else:
+        try:
+            correct_answer = get_object_or_404(Answer, id=request.POST['correct_answer'])
             question.correct_answer = correct_answer
             question.save()
+        except KeyError:
+            pass
         form = self.form_class(request.user, request.POST)
         if form.is_valid():
             form.save()

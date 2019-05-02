@@ -9,6 +9,4 @@ urlpatterns = [
     path('question/<int:id>/', views.QuestionDetailsView.as_view(), name='question'),
     path('search/', views.SearchView.as_view(), name='search'),
     path('search/<str:tag>/', views.SearchTagView.as_view(), name='search_tag'),
-    path('vote/', views.VoteView.as_view(), name='vote'),
-
 ]

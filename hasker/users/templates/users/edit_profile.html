@@ -18,20 +18,17 @@
                     {% csrf_token %}
                     <dl class="row">
                         <dt class="col-sm-3 html">Email</dt>
-                        <!--<dd class="col-sm-9 html">{{ user.email }}</dd>-->
                         <dd class="col-sm-9 html">
-                            <div class="control-group {% if form_email.email.errors %} has-error {% endif %}">
-                                <div class="controls">{{ form_email.new_email}}</div>
+                            <div class="control-group {% if new_fields_form.email.errors %} has-error {% endif %}">
+                                <div class="controls">{{ new_fields_form.new_email}}</div>
                             </div>
-                            <!--<input type="hidden" name="username" value="{{user.username}}">-->
                         </dd>
 
                         <dt class="col-sm-3 html">Avatar</dt>
-                        <!--<dd class="col-sm-9 html"><img src="{{ user.userprofile.get_url_avatar }}" height = "200"></dd>-->
                         <dd class="col-sm-9 html">
-                            <div class="control-group {% if form_avatar.avatar.errors %} has-error {% endif %}">
-                                <div><input type="file" name="avatar">
-                                    {% if form_avatar.avatar.errors %}{{ profile_form.avatar.errors }}{% endif %}
+                            <div class="control-group {% if new_fields_form.avatar.errors %} has-error {% endif %}">
+                                <div><input type="file" name="new_avatar">
+                                    {% if new_fields_form.avatar.errors %}{{ new_fields_form.avatar.errors }}{% endif %}
                                 </div>
                              </div>
                         </dd>
@@ -44,8 +41,11 @@
 
             <dt class="col-sm-3 html">You voted for the question:</dt>
             {% if user.userprofile.title_voted_question %}
-                <dd class="col-sm-6 html"><a href="{{ user.userprofile.get_url_voted_question }}">
-                    {{ user.userprofile.title_voted_question}}</a></dd>
+                <dd class="col-sm-6 html">
+                    <a href="{{ user.userprofile.get_url_voted_question }}">
+                        {{ user.userprofile.title_voted_question }}
+                    </a>
+                </dd>
                 <dd class="col-sm-3 html">
                     <form action="{% url 'users:profile' user.id %}" method="POST">
                         {%csrf_token %}
@@ -58,8 +58,9 @@
 
             <dt class="col-sm-3 html">You voted for the answer:</dt>
             {% if user.userprofile.title_voted_answer %}
-                <dd class="col-sm-6 html"><a href="{{ user.userprofile.get_url_voted_answer }}">
-                    {{ user.userprofile.title_voted_answer}}</a></dd>
+                <dd class="col-sm-6 html">
+                    <a href="{{ user.userprofile.get_url_voted_answer }}">{{ user.userprofile.title_voted_answer }}</a>
+                </dd>
                 <dd class="col-sm-3 html">
                     <form action="{% url 'users:profile' user.id %}" method="post">
                         {%csrf_token %}

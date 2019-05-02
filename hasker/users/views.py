@@ -4,15 +4,18 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views import View
 
-from .forms import SignupForm, UserProfileSignupForm, ChangeEmailForm
+from .forms import SignupForm, UserProfileSignupForm, ChangeFieldsForm
 from qa.models import Question
 
 
 class SignUpView(View):
     form = SignupForm
     profile_form = UserProfileSignupForm
-    context = {'trending': Question.objects.popular()}
     template_name = 'users/signup.html'
+
+    def __init__(self, *args, **kwargs):
+        super(SignUpView, self).__init__(*args, **kwargs)
+        self.context = {'trending': Question.objects.popular()}
 
     def get(self, request, *args, **kwargs):
         self.context['form'] = self.form()
@@ -40,11 +43,14 @@ class SignUpView(View):
 
 class LogInView(View):
     form = AuthenticationForm
-    context = {
-        'trending': Question.objects.popular(),
-        'error': ''
-    }
     template_name = 'users/login.html'
+
+    def __init__(self, *args, **kwargs):
+        super(LogInView, self).__init__(*args, **kwargs)
+        self.context = {
+            'trending': Question.objects.popular(),
+            'error': ''
+        }
 
     def get(self, request, *args, **kwargs):
         form = self.form()
@@ -59,16 +65,20 @@ class LogInView(View):
             login(request, user)
             url = request.POST.get('continue', '/')
             return HttpResponseRedirect(url)
+        self.context['form'] = self.form()
         self.context['error'] = 'Invalid username/password'
         return render(request, self.template_name, self.context)
 
 
 class ProfileView(View):
-    context = {
-        'trending': Question.objects.popular(),
-        'error': ''
-    }
     template_name = 'users/profile.html'
+
+    def __init__(self, *args, **kwargs):
+        super(ProfileView, self).__init__(*args, **kwargs)
+        self.context = {
+            'trending': Question.objects.popular(),
+            'error': ''
+        }
 
     def get(self, request, *args, **kwargs):
         self.context['user'] = request.user
@@ -91,30 +101,30 @@ class ProfileView(View):
 
 
 class EditProfileView(View):
-    form_email = ChangeEmailForm
-    form_avatar = UserProfileSignupForm
-    context = {'trending': Question.objects.popular()}
+    new_fields_form = ChangeFieldsForm
     template_name = 'users/edit_profile.html'
 
+    def __init__(self, *args, **kwargs):
+        super(EditProfileView, self).__init__(*args, **kwargs)
+        self.context = {'trending': Question.objects.popular()}
+
     def get(self, request, *args, **kwargs):
-        self.context['form_email'] = self.form_email(initial={'new_email': request.user.email})
-        self.context['form_avatar'] = self.form_avatar(initial={'avatar': request.user.userprofile.avatar})
+        self.context['new_fields_form'] = self.new_fields_form(initial={'new_email': request.user.email})
         return render(request, self.template_name, self.context)
 
     def post(self, request, *args, **kwargs):
-        form_email = self.form_email(request.POST)
-        form_avatar = self.form_avatar(request.POST, request.FILES)
-        if form_email.is_valid() and form_avatar.is_valid():
+        new_fields_form = self.new_fields_form(request.POST, request.FILES)
+        if new_fields_form.is_valid():
             user = request.user
-            new_email = form_email.save()
-            user.email = new_email
-            user.userprofile.avatar = form_avatar.clean_avatar()
-            user.userprofile.save()
-            user.save()
+            new_fields = new_fields_form.save()
+            user.email = new_fields['new_email']
+            if request.FILES:
+                user.userprofile.avatar = new_fields['new_avatar']
+                user.userprofile.save()
+            user.save() # 'NoneType' object has no attribute 'strip' при работе с MySQL
             url = user.userprofile.get_url()
             return HttpResponseRedirect(url)
-        self.context['form_email'] = form_email
-        self.context['form_avatar'] = form_avatar
+        self.context['new_fields_form'] = new_fields_form
         return render(request, self.template_name, self.context)
 
 

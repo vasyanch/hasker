@@ -10,7 +10,7 @@
             <dd class="col-sm-9 html">{{ user.username }}</dd>
 
             <dt class="col-sm-3 html">Date of registration</dt>
-            <dd class="col-sm-9 html">{{ user.userprofile.get_date_joined}}</dd>
+            <dd class="col-sm-9 html">{{ user.userprofile.get_date_joined }}</dd>
 
             <dt class="col-sm-3 html">Email</dt>
             <dd class="col-sm-9 html">{{ user.email }}</dd>
@@ -24,11 +24,14 @@
 
             <dt class="col-sm-3 html">You voted for the question:</dt>
             {% if user.userprofile.title_voted_question %}
-                <dd class="col-sm-6 html"><a href="{{ user.userprofile.get_url_voted_question }}">
-                    {{ user.userprofile.title_voted_question}}</a></dd>
+                <dd class="col-sm-6 html">
+                    <a href="{{ user.userprofile.get_url_voted_question }}">
+                        {{ user.userprofile.title_voted_question }}
+                    </a>
+                </dd>
                 <dd class="col-sm-3 html">
                     <form action="{% url 'users:profile' user.id %}" method="POST">
-                        {%csrf_token %}
+                        {% csrf_token %}
                         <input type="submit" name="change_choice" value="Change question">
                     </form>
                 </dd>

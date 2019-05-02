@@ -2,17 +2,18 @@
 
 {% block content %}
     <h2>{{question.title}}</h2>
+    <div>{{ vote_error }}</div>
     <dl class="row">
         <dd class="col-sm-2 html">
             {% if user.is_authenticated %}
-                <form action="{% url 'qa:vote' %}" method="post">
+                <form action="{% url 'qa:question' question.id %}" method="post">
                     {% csrf_token %}
                     <input class="small" type="submit" name="rating" value="+1">
                     {{ question.rating }}
                     <input class="small" type="submit" name="rating" value="-1">
                     <input type="hidden" name="object_id" value="{{question.id}}">
                     <input type="hidden" name="models" value="question">
-                    <input type="hidden" name="url" value="{% url 'qa:question' question.id %}">
+<!--                    <input type="hidden" name="url" value="{% url 'qa:question' question.id %}">-->
                 </form>
             {% else %}
                 {{ question.rating }}
@@ -43,14 +44,14 @@
                     <div class="badge badge-success">correct</div>
                 {% endif %}
                 {% if user.is_authenticated %}
-                    <form action="{% url 'qa:vote' %}" method="post">
+                    <form action="{% url 'qa:question' question.id %}" method="post">
                         {% csrf_token %}
                         <input class="small" type="submit" name="rating" value="+1">
                         {{ ans.rating }}
                         <input class="small" type="submit" name="rating" value="-1">
                         <input type="hidden" name="object_id" value="{{ans.id}}">
                         <input type="hidden" name="models" value="answer">
-                        <input type="hidden" name="url" value="{% url  'qa:question' question.id %}">
+<!--                        <input type="hidden" name="url" value="{% url  'qa:question' question.id %}">-->
                     </form>
                 {% else %}
                     {{ ans.rating }}
@@ -62,7 +63,7 @@
                 <a href="{% url 'users:profile' ans.author_id %}">{{ ans.author.username }}</a>
             </dd>
         </dl>
-        {% if user.id == question.author_id and not ans.is_correct%}
+        {% if user.id == question.author_id and not ans.is_correct %}
             <form action="{% url 'qa:question' question.id %}" method="post">
                 {% csrf_token %}
                 <small>This is the correct answer?</small>
@@ -80,12 +81,12 @@
         {% endfor %}
         <form class="form-horizontal" method="POST" action="{% url 'qa:question' question.id %}">
             {% csrf_token %}
-            <div class="control-group{% if form.text.errors %}has-error{% endif %}">
+            <div class="control-group {% if form.text.errors %} has-error {% endif %}">
                 <div>{{ form.text }}</div>
             </div>
             <input type="hidden" name="question" value="{{question.id}}">
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn btn-primary">replay</button>
             </div>
         </form>
     {% endif %}

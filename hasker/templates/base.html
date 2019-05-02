@@ -15,20 +15,22 @@
         <nav class="navbar navbar-light bg-light">
             <a class="navbar-brand mr--5" href="{% url 'index' %}">Hasker</a>
             <form class="form-inline" method="GET" action="{% url 'qa:search' %}">
-                {% 	csrf_token %}
-                <input class="form-control mr-0" type="text" name="query" placeholder="Search"
-                       maxlength="100" aria-label="Search">
+                {% csrf_token %}
+                <input class="form-control mr-0" type="text" name="query" placeholder="Search" maxlength="100"
+                       aria-label="Search">
                 <button class="btn btn-outline-success ml-1" type="submit">Search</button>
             </form>
             <ul class="nav justify-content-end">
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a href="{% url 'qa:ask' %}"><button class="btn btn-outline-success mr-5" type="submit">
-                            Ask Question!</button></a>
+                        <a href="{% url 'qa:ask' %}">
+                            <button class="btn btn-outline-success mr-5" type="submit">Ask Question!</button>
+                        </a>
                     </li>
 
                     <li class="nav-item">
-                        <img src="{{ user.userprofile.get_url_avatar }}" width="30" height="40" class="d-inline-block align-top">
+                        <img src="{{ user.userprofile.get_url_avatar }}" width="30" height="40"
+                             class="d-inline-block align-top">
                     </li>
 
                     <li class="nav-item">
@@ -43,16 +45,18 @@
                 {% else %}
                     <li class="nav-item">
                         <a  href="{% url 'users:signup' %}">
-                            <button class="btn btn-outline-success " type="submit">Sign up</button></a>
+                            <button class="btn btn-outline-success " type="submit">Sign up</button>
+                        </a>
                     </li>
 
                     <li class="nav-item">
                         <a href="{% url 'users:login' %}">
-                            <button class="btn btn-outline-success ml-2" type="submit">Log in</button></a>
+                            <button class="btn btn-outline-success ml-2" type="submit">Log in</button>
+                        </a>
                     </li>
                 {% endif %}
             </ul>
-	    </nav>
+        </nav>
         <div class="container">
             <div class="row">
                 <div class="col-md-10">{% block content %}{% endblock %}</div>
@@ -70,7 +74,13 @@
 
         <!-- Optional JavaScript -->
         <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-        <script src="{% static 'js/jquery-3.3.1.slim.min.js' %}" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-        <script src="{% static 'js/bootstrap.min.js' %}" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+        <script src="{% static 'js/jquery-3.3.1.slim.min.js' %}"
+                integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+                crossorigin="anonymous">
+        </script>
+        <script src="{% static 'js/bootstrap.min.js' %}"
+                integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+                crossorigin="anonymous">
+        </script>
     </body>
 </html>
