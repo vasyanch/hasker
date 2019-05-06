@@ -10,7 +10,6 @@ class QuestionModelTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create()
-        UserProfile.objects.create(user=self.user)
         self.q_first = Question.objects.create(title='first', author=self.user)
         self.q_first.save(['first', 'two', 'three'])
         self.q_no_tags = Question.objects.create(title='no_tags', author=self.user)
@@ -39,7 +38,7 @@ class QuestionModelTest(TestCase):
         self.assertEqual(self.q_first.rating, 0)
 
     def test_get_url(self):
-        self.assertEqual('/qa/question/1/', self.q_first.get_url())
+        self.assertEqual('/qa/question/{}/'.format(self.q_first.id), self.q_first.get_url())
 
     def test_get_tags(self):
         tags = Tag.objects.filter(questions=self.q_first.id)
@@ -72,7 +71,6 @@ class AnswerModelTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create()
-        UserProfile.objects.create(user=self.user)
         self.question = Question.objects.create(title='for_answer', author=self.user)
         self.answer_no_correct = Answer.objects.create(text='no correct', question=self.question, author=self.user)
         self.answer_correct = Answer.objects.create(text='correct', question=self.question, author=self.user)

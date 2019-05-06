@@ -9,7 +9,7 @@ MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD_FOR_HASKER')
 DATABASES = {
     'default': {
         'NAME': 'hasker',
-        'ENGINE': 'mysql.connector.django',  # 'django.db.backends.mysql'
+        'ENGINE': 'django.db.backends.mysql',
         'USER': 'django',
         'PASSWORD': MYSQL_PASSWORD,
         'OPTIONS': {

@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 from django.urls import path, include
 
 from qa import views as qa_views
-
+from utils import common_views
 
 urlpatterns = [
     path('', qa_views.IndexView.as_view(), name='index'),
@@ -13,5 +13,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-handler404 = qa_views.NotFoundView.as_view()
-handler500 = qa_views.ServerError.as_view()
+handler404 = common_views.NotFoundView.as_view()
+handler500 = common_views.ServerErrorView.as_view()

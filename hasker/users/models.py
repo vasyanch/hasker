@@ -3,6 +3,8 @@ import os
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
@@ -14,7 +16,7 @@ def user_directory_path(instance, filename):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(verbose_name='profile photo', upload_to=user_directory_path, blank=True, null=True)
     value_voted_question = models.IntegerField(default=None, null=True)
     id_voted_question = models.IntegerField(default=None, null=True)
@@ -65,3 +67,12 @@ class UserProfile(models.Model):
 
     def get_url_voted_question(self):
         return reverse('qa:question', args=[self.id_voted_question])
+
+    @receiver(post_save, sender=User)
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            UserProfile.objects.create(user=instance)
+
+    @receiver(post_save, sender=User)
+    def save_user_profile(sender, instance, **kwargs):
+        instance.userprofile.save()

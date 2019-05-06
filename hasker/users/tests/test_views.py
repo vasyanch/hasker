@@ -1,11 +1,14 @@
 import datetime
+import os
+import tempfile
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import AnonymousUser
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
 from qa.models import Question, Answer
+from .test_models import get_temporary_image
 from users.forms import SignupForm, UserProfileSignupForm, ChangeFieldsForm
 from users.models import User, UserProfile
 
@@ -64,12 +67,19 @@ class SignUpViewTest(TestCase):
         self.check_templates(response, ['users/signup.html', 'base.html'])
         self.check_trending(response)
 
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_post_ok(self):
+        temp_file = tempfile.NamedTemporaryFile(suffix=".jpg")
+        test_image = get_temporary_image(temp_file)
+        test_image.seek(0)
         response = self.client.post(reverse('users:signup'),
                                     data={'username': 'django', 'password1': 'django123TEST',
-                                          'password2': 'django123TEST', 'email': 'django@mail.ru'},
+                                          'password2': 'django123TEST', 'email': 'django@mail.ru',
+                                          'avatar': test_image},
                                     follow=True)
         new_user = User.objects.get(username='django')
+        self.assertEqual(new_user.userprofile.get_url_avatar(),
+                         os.path.join('/media/ava_user_{}'.format(new_user.id), os.path.split(test_image.name)[-1]))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(new_user.email, 'django@mail.ru')
         self.assertEqual(response.redirect_chain, [(reverse('index'), 302)])
@@ -148,7 +158,6 @@ class ProfileViewTest(TestCase):
         testuser = User.objects.create(username='testuser')
         testuser.set_password('testuser123')
         testuser.save()
-        UserProfile.objects.create(user=testuser)
         user = User.objects.create(username='vasya')
         Question.objects.create(
             title='first',
@@ -239,7 +248,6 @@ class EditProfileViewTest(TestCase):
         testuser = User.objects.create(username='testuser')
         testuser.set_password('testuser123')
         testuser.save()
-        UserProfile.objects.create(user=testuser)
         user = User.objects.create(username='vasya')
         Question.objects.create(
             title='first',

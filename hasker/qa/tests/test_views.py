@@ -67,7 +67,6 @@ class QuestionAddViewTest(TestCase):
         testuser = User.objects.create(username='testuser')
         testuser.set_password('testuser123')
         testuser.save()
-        UserProfile.objects.create(user=testuser)
         Question.objects.create(
             title='first',
             author=user,
@@ -147,7 +146,6 @@ class QuestionDetalsViewTest(TestCase):
         testuser = User.objects.create(username='testuser')
         testuser.set_password('testuser123')
         testuser.save()
-        UserProfile.objects.create(user=testuser)
         question = Question.objects.create(
             title='first',
             author=user,

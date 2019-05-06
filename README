@@ -30,3 +30,4 @@
 Запуск тестов
 
   - python manage.py test  --settings hasker.settings.base
+  - python manage.py test  --settings hasker.settings.prod

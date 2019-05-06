@@ -1,3 +1,4 @@
+from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -77,7 +78,7 @@ class QuestionDetailsView(View):
         question = get_object_or_404(Question, id=self.kwargs['id'])
         self.context['question'] = question
         self.context['user'] = request.user
-        try:
+        if request.POST.get('rating'):
             rating = int(request.POST.get('rating'))
             models = request.POST.get('models')
             object_id = request.POST.get('object_id')
@@ -92,49 +93,24 @@ class QuestionDetailsView(View):
                                              'But you can change you choice! See you profile page.'
             question = get_object_or_404(Question, id=self.kwargs['id'])
             self.context['question'] = question
-        except TypeError:
-            pass
-        try:
+        if request.POST.get('correct_answer'):
             correct_answer = get_object_or_404(Answer, id=request.POST['correct_answer'])
             question.correct_answer = correct_answer
             question.save()
-        except KeyError:
-            pass
         form = self.form_class(request.user, request.POST)
         if form.is_valid():
             form.save()
             url = question.get_url()
+            current_site = get_current_site(request)
             send_mail(
                 'New answer!',
-                """A new answer for your question!\nFollow this link to see it: {}""".format(url),
+                "A new answer for your question!\nFollow this link to see it: {0}{1}".format(current_site.name, url),
                 'vasyanch@yandex.ru',
                 [question.author.email],
                 fail_silently=False
             )
             return HttpResponseRedirect(url)
         self.context['form'] = form
-        return render(request, self.template_name, self.context)
-
-
-class NotFoundView(View):
-    template_name = '404.html'
-    context = {
-        'trending': Question.objects.popular(),
-        'exception': '',
-    }
-
-    def get(self, request, *args, **kwargs):
-        self.context['exception'] = self.kwargs['exception']
-        self.context['request_path'] = request.path
-        return render(request, self.template_name, self.context)
-
-
-class ServerError(View):
-    template_name = '500.html'
-    context = {'trending': Question.objects.popular()}
-
-    def get(self, request, *args, **kwargs):
-        self.context['request_path'] = request.path
         return render(request, self.template_name, self.context)
 
 

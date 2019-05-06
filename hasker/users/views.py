@@ -27,10 +27,10 @@ class SignUpView(View):
         profile_form = self.profile_form(request.POST, request.FILES)
         if form.is_valid() and profile_form.is_valid():
             new_user = form.save()
-            user_profile = profile_form.save(commit=False)
-            user_profile.user = new_user
-            user_profile.save()
-            username = new_user.username
+            ava_form = profile_form.save(commit=False)
+            new_user.userprofile.avatar = ava_form.avatar
+            new_user.save()
+            username = new_user.get_username()
             password = request.POST.get('password1')
             user = authenticate(request, username=username, password=password)
             login(request, user)
@@ -120,8 +120,7 @@ class EditProfileView(View):
             user.email = new_fields['new_email']
             if request.FILES:
                 user.userprofile.avatar = new_fields['new_avatar']
-                user.userprofile.save()
-            user.save() # 'NoneType' object has no attribute 'strip' при работе с MySQL
+            user.save()
             url = user.userprofile.get_url()
             return HttpResponseRedirect(url)
         self.context['new_fields_form'] = new_fields_form

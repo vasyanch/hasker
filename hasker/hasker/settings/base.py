@@ -1,5 +1,4 @@
 import os
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 SECRET_KEY = os.getenv('HASKER_SECRET')
@@ -14,6 +13,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.sites',
     'django.contrib.staticfiles',
     'django.contrib.messages',
 
@@ -99,3 +99,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 EMAIL_HOST = 'localhost'
 
 EMAIL_PORT = 1025
+
+SITE_ID = 1
