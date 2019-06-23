@@ -22,7 +22,7 @@ class IndexView(generic.ListView):
             return Question.objects.popular()
 
     def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(IndexView, self).get_context_data(**kwargs)
         context['flag'] = self.flag
         context['trending'] = Question.objects.popular()
         context['user'] = self.request.user
