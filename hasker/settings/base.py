@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'rest_framework',
     'django_filters',
+    'rest_framework_swagger',
 
     'qa.apps.QaConfig',
     'users.apps.UsersConfig',

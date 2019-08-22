@@ -9,7 +9,7 @@ admin
 mysql
 venv
 __pycache__
-hasker/hasker/settings/secret.py
+hasker/settings/secret.py
 answer
 todo
-hasker/media/
+media

@@ -19,7 +19,7 @@ DATABASES = {
 }
 
 if not DEBUG:
-    STATIC_ROOT = '/home/django/www-data/hasker/static/'
+    STATIC_ROOT = '/home/django/hasker/static/'
 
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
