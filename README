@@ -33,6 +33,7 @@
   - python manage.py runserver --settings hasker.settings.base
 
 
+
 Запуск тестов
 
   - python manage.py test  --settings hasker.settings.base
